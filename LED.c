@@ -43,7 +43,7 @@ void setStopLed(int x, int y, OnOff status) {
     { 0x24, 0x27, 0x22, 0x26, 0x20 },
     { 0x41, 0x71, 0x01, 0x11, 0x51 }
   };
-  if ((x<1 || x>5) || (y<1 || y>9)) CRASH("Coordinate out of range");
+  if ((x<1 || x>5) || (y<1 || y>9)) return; // silently ignore
   out(matrixCoordinatesToCommand(M[y-1][x-1], status));
 }
 

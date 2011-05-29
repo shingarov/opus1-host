@@ -31,6 +31,13 @@ static unsigned matrixCoordinatesToCommand(unsigned m, OnOff status) {
   return s | x | (y<<3);
 }
 
+/*
+ * These matrices (the one here and the one-row matrices in setOrganLed()
+ * and setStatusLed()) represent the permutations of wires from the LEDs
+ * anodes/cathodes.  It is a lot easier to correct the order of wires in
+ * software than to trace which wire is which in the nest of wires that
+ * is the Opus.1 box (or any electronic organ).
+ */
 void setStopLed(int x, int y, OnOff status) {
   static unsigned M[9][5] = {
     { 0x44, 0x47, 0x42, 0x46, 0x40 },

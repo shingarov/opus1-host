@@ -78,4 +78,8 @@ void setCouplerLed (int C, OnOff status) {
   out(matrixCoordinatesToCommand(M[C-1], status));
 }
 
+void setOK (OnOff status) {
+  unsigned char command = status? 0x81:0x80;
+  out(command);
+}
 

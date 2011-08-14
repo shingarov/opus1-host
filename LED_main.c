@@ -121,6 +121,13 @@ static void process_coupler(unsigned msgType, unsigned note ) {
   setCouplerLed(note, msgType==NOTE_ON? ON:OFF);
 }
 
+static void process_ok(unsigned msgType, unsigned note ) {
+  // Any NOTE ON on the OK channel will turn the OK LED on,
+  // Any NOTE OFF on the OK channel will turn the OK LED off.
+  // NB: we do not care which note it is.
+  setOK(msgType==NOTE_ON? ON:OFF);
+}
+
 void process_short_message(unsigned channel,
                            unsigned msgType,
                            unsigned value1,
@@ -137,6 +144,9 @@ void process_short_message(unsigned channel,
       break;
     case COUPLER_CHANNEL:
       process_coupler(msgType, value1);
+      break;
+    case OK_CHANNEL:
+      process_ok(msgType, value1);
       break;
     default:
       break;

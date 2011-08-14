@@ -46,8 +46,19 @@ static void illuminate(OnOff on_off) {
   }
 }
 
+void blinkOK() {
+  int i;
+  for (i=1; i<5; i++) {
+    setOK(ON);
+    Sleep(500);
+    setOK(OFF);
+    Sleep(500);
+  }
+}
+
 int main() {
   open_serial_port(LED_COM_PORT);
+  blinkOK();
   illuminate(ON);
   illuminate(OFF);
 }

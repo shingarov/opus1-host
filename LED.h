@@ -45,5 +45,10 @@ void setStatusLed(int S, OnOff status);
  */
 void setCouplerLed (int C, OnOff status);
 
+/**
+ * OK LED (the green LED under the audio mode knob.
+ */
+void setOK(OnOff status);
+
 #endif
 

@@ -24,6 +24,3 @@
 #define NOTE_ON  9
 #define NOTE_OFF 8
 
-//  #define HAUPTWERK_PATH "C:\\Program Files\\Hauptwerk Virtual Pipe Organ\\Hauptwerk.exe"
-#define HAUPTWERK_PATH "C:\\windows\\system32\\calc.exe"
-#define HAUPTWERK_FOLDER "\"C:\\Program Files\\Hauptwerk Virtual Pipe Organ\""

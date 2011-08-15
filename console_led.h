@@ -1,5 +1,5 @@
 /*
- * console.c -- API for the console host driver functions.
+ * console_led.h -- API for controlling Rodgers console LEDs.
  *
  * Copyright (c) LADAREVO SOFTWARE INC.
  * LADAREVO ORGELBAU LAB

@@ -34,6 +34,22 @@ static void start_drawknobs() {
     setStatusLed(4, ON);
     CRASH("Could not spawn drawknobs.exe");
   }
+
+  success = CreateProcess(
+    NULL,
+    "c:\\OPUS.1\\console.exe",
+    NULL, // process attributes
+    NULL, //thread attributes
+    FALSE, // inherit handles
+    CREATE_NEW_CONSOLE, // flags
+    NULL, //environment
+    "C:\\OPUS.1",  // current dir
+    &si,
+    &pi);
+  if (!success) {
+    setStatusLed(4, ON);
+    CRASH("Could not spawn console.exe");
+  }
 }
 
 static void allOrganLoadingLedsOff(void) {

@@ -14,12 +14,18 @@ void init_midi_out(const char *out_device_name);
 
 void reset_midi(void);
 
-void send_short_message(unsigned channel, unsigned msgType, unsigned value1, unsigned value2);
+void send_short_message(unsigned channel,
+                        unsigned msgType,
+                        unsigned value1,
+                        unsigned value2);
 
 
 /**********************************
  *       Imported functions       *
  **********************************/
 
-void process_short_message(unsigned channel, unsigned msgType, unsigned value1, unsigned value2);
+void process_short_message(unsigned channel,
+                           unsigned msgType,
+                           unsigned value1,
+                           unsigned value2);
 

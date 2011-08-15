@@ -19,7 +19,7 @@ static void set_comm_parm(void) {
   if (!GetCommTimeouts(h, &ctm)) CRASH("GetCommTimeouts() failed");
   ctm.ReadIntervalTimeout = 0;
   ctm.ReadTotalTimeoutMultiplier = 0;
-  ctm.ReadTotalTimeoutConstant = 0;
+  ctm.ReadTotalTimeoutConstant = 40; // very ugly; see below
   if (!SetCommTimeouts(h, &ctm)) CRASH("SetCommTimeouts() failed");
 }
 
@@ -42,8 +42,14 @@ unsigned char in(void) {
   unsigned char b;
   BOOL success;
   DWORD actuallyRead;
+again:
   success = ReadFile(h, &b, 1, &actuallyRead, NULL);
-  if ((!success) || (actuallyRead!=1)) CRASH("ReadFile failed");
+  if (!success) CRASH("ReadFile failed");
+  // Very ugly.  I'd just wait here forever, but unfortunately,
+  // MIDI input messages (if any) will not have a chance to come
+  // in if we sit blocked on comm i/o; even though they are supposedly
+  // interrupt based.
+  if (actuallyRead != 1) goto again;
   return b;
 }
 

@@ -1,25 +1,36 @@
 /*
- * LED.c -- Host-side driver for the console.
+ * console.c -- Host-side driver for the arduino controller
+ * embedded in the Rodgers console; main program.
  *
  * Copyright (c) LADAREVO SOFTWARE INC.
  * LADAREVO ORGELBAU LAB
  *
  */
 
+#include <windows.h>
 #include "IO.h"
 #include "CRASH.h"
-#include "console.h"
+#include "serial_io.h"
+#include "MIDI.h"
+#include "hauptwerk.h"
+#include "console_led.h"
+#include "console_piston.h"
 
-/*
- * Construct a wire protocol command to turn a LED on/off.
- */
-static unsigned char ledCommand(unsigned led, int status) {
-  if ((status!=0) && (status!=1)) CRASH("Status mus be 0 or 1");
-  if (led > 10) CRASH("Bad console LED number");
-  return (status << 4) | led;
-}
 
-void setConsoleLed(unsigned led, int status) {
-  out(ledCommand(led, status));
+int main() {
+  HANDLE hThread;
+  open_serial_port(RODGERS_COM_PORT);
+  init_midi_out(MIDI_PORT_CONSOLE_PISTONS);
+  init_midi_in (MIDI_PORT_CONSOLE_LED);
+  atexit(reset_midi); 
+
+  for (;;) {
+    unsigned char high;
+    unsigned char low;
+
+    high = in();
+    low  = in();
+    process_console_control(high, low);
+  }
 }
 

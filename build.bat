@@ -1,4 +1,4 @@
-cl LED.c LED_main.c CRASH.c MIDI.c serial_io.c winmm.lib
+cl /DREADTIMEOUT=0 LED.c LED_main.c CRASH.c MIDI.c serial_io.c winmm.lib
 cl /DREADTIMEOUT=0 drawknob.c CRASH.c MIDI.c serial_io.c winmm.lib
 rem cl Debug_LED.c CRASH.c serial_io.c LED.c
 rem cl Debug_LED_2.c CRASH.c serial_io.c LED.c

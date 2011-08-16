@@ -19,7 +19,8 @@ static void set_comm_parm(void) {
   if (!GetCommTimeouts(h, &ctm)) CRASH("GetCommTimeouts() failed");
   ctm.ReadIntervalTimeout = 0;
   ctm.ReadTotalTimeoutMultiplier = 0;
-  ctm.ReadTotalTimeoutConstant = 40; // very ugly; see below
+  // very ugly; see below.  set this to num of miliseconds or to 0
+  ctm.ReadTotalTimeoutConstant = READTIMEOUT;
   if (!SetCommTimeouts(h, &ctm)) CRASH("SetCommTimeouts() failed");
 }
 

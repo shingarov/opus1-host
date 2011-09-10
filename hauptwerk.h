@@ -1,5 +1,9 @@
 /*
  * Hauptwerk MIDI settings.
+ *
+ * Copyright (c) 2009-2011 LADAREVO SOFTWARE INC.
+ * LADAREVO ORGELBAU LAB
+ *
  */
 
 // MIDI ports:

@@ -2,7 +2,7 @@
  * console.c -- Host-side driver for the arduino controller
  * embedded in the Rodgers console; main program.
  *
- * Copyright (c) LADAREVO SOFTWARE INC.
+ * Copyright (c) 2009-2011 LADAREVO SOFTWARE INC.
  * LADAREVO ORGELBAU LAB
  *
  */

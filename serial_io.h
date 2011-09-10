@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2009-2011 LADAREVO SOFTWARE INC.
+ * LADAREVO ORGELBAU LAB
+ */
+
 #ifndef serial_io_h
 #define serial_io_h
 

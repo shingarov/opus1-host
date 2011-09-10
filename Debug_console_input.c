@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2009-2011 LADAREVO SOFTWARE INC.
+ * LADAREVO ORGELBAU LAB
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include "serial_io.h"

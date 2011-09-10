@@ -10,6 +10,8 @@
 #define ORGAN_LOADING 1
 #define ORGAN_LOADED 2
 
+// #define DEBUG 1
+
 static void start_drawknobs() {
   BOOL success;
   STARTUPINFO si;
@@ -122,32 +124,85 @@ static void process_organ_selection(unsigned msgType, unsigned value1 ) {
           organ_status = ORGAN_LOADED;
           allOrganLoadingLedsOff();
           setOrganLed(favorite_organ, ON);
-        } else {
+        } else if (msgType==NOTE_OFF) {
           organ_status = ORGAN_NOT_LOADED;
           allOrganLoadingLedsOff();
+        } else {
+          // unknown message type
         }
      }
 }
 
-static void process_system_status(unsigned msgType, unsigned note ) {
-  setStatusLed(note, msgType==NOTE_ON? ON:OFF);
+static void process_system_status(unsigned msgType, unsigned note) {
+  switch (msgType) {
+    case NOTE_ON:
+      setStatusLed(note, ON);
+      break;
+    case NOTE_OFF:
+      setStatusLed(note, OFF);
+      break;
+    default:
+      // ignore unknown message types
+      break;
+  }
 }
 
-static void process_coupler(unsigned msgType, unsigned note ) {
-  setCouplerLed(note, msgType==NOTE_ON? ON:OFF);
+static void process_coupler(unsigned msgType, unsigned note) {
+  switch (msgType) {
+    case NOTE_ON:
+      setCouplerLed(note, ON);
+      break;
+    case NOTE_OFF:
+      setCouplerLed(note, OFF);
+      break;
+    default:
+      // ignore unknown message types
+      break;
+  }
 }
 
 static void process_ok(unsigned msgType, unsigned note ) {
   // Any NOTE ON on the OK channel will turn the OK LED on,
   // Any NOTE OFF on the OK channel will turn the OK LED off.
   // NB: we do not care which note it is.
-  setOK(msgType==NOTE_ON? ON:OFF);
+  if (msgType==NOTE_ON) {
+    setOK(ON);
+#ifdef DEBUG
+    printf(" OK ON ");
+#endif
+  } else if (msgType==NOTE_OFF) {
+    setOK(OFF);
+#ifdef DEBUG
+    printf(" OK OFF ");
+#endif
+  } else {
+    // ignore unknown message types
+    printf(" UNKNOWN TYPE ");
+  }
 }
 
 void process_short_message(unsigned channel,
                            unsigned msgType,
                            unsigned value1,
                            unsigned value2) {
+#ifdef DEBUG
+  printf("MIDI-> %d / ", channel);
+  switch (msgType) {
+    case NOTE_OFF:
+      printf("NOTE_OFF / ");
+      break;
+    case NOTE_ON:
+      printf("NOTE_OF / ");
+      break;
+    case CC:
+      printf("NOTE_OF / ");
+      break;
+    default:
+      printf("%d / ", msgType);
+  }
+  printf("%d / %d\n", value1, value2);
+#endif
+
   switch (channel) {
     case SPEAKING_STOP_CHANNEL:
       process_speaking_stop(msgType, value1);
@@ -165,7 +220,11 @@ void process_short_message(unsigned channel,
       process_ok(msgType, value1);
       break;
     default:
+      printf(" UNKNOWN CHANNEL ");
       break;
   }
+#ifdef DEBUG
+  printf("\n");
+#endif
 }
 

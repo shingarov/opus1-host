@@ -120,9 +120,11 @@ static void process_organ_selection(unsigned msgType, unsigned value1 ) {
           allOrganLoadingLedsOff();
           organ_status = ORGAN_LOADING;
         } // NOTE_OFF ignored
-      } else if ((value1>=1) && (value1<=9)) { // Favorite Organ
+      } else if ((value1>=1) && (value1<=17)) { // Favorite Organ
         if (msgType==NOTE_ON) {
-          favorite_organ = value1;
+          favorite_organ = (value1>10) ?
+               (value1 - 10) :
+               value1;
         } // NOTE_OFF ignored
       } else if (value1==127) { // AUDIO ACTIVE
         if (msgType==NOTE_ON) {

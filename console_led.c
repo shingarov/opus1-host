@@ -10,24 +10,8 @@
 #include "IO.h"
 #include "CRASH.h"
 #include "hauptwerk.h"
-#include "console_led.h"
 #include "console_wire.h"
 
-/*
- * Construct a wire protocol command to turn a LED on/off.
- * This is only called from setConsoleStopLED() and from set7SegmentLED().
- */
-static unsigned char ledCommand(unsigned displayNo, unsigned x, unsigned y, unsigned status) {
-  return (status<<7) | (displayNo<<6) | (x<<3) | y;
-}
-
-void setConsoleStopLED(unsigned x, unsigned y, unsigned status) {
-  out(ledCommand(0, x, y, status));
-}
-
-void set7SegmentLED(unsigned x, unsigned y, unsigned status) {
-  out(ledCommand(1, x, y, status));
-}
 
 
 

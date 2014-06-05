@@ -1,12 +1,9 @@
 #
-#  MIDITransform -- transform stop change messages from SysEx bitmap
-#  format to individual engage/disengage messages.
-#
 #  Makefile -- Drive project compilation.
-#  I have successfully used this with MS C++ complier (cl) v.15.00,
-#  linker (lib) v.9.00, and resource compiler (rc) v.6.1.
+#  As of OPUS.1R2, we have switched from MS C++ complier (cl) v.15.00 and
+#  linker (lib) v.9.00, to mingw32-gcc.
 #
-#  Copyright (C) 2009 Boris Shingarov
+#  Copyright (C) 2009-2014 Boris Shingarov and Ladarevo Software Inc.
 # 
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,17 +20,33 @@
 #  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+CC = x86_64-w64-mingw32-gcc
+TARGETDIR=/home/boris/lamya/opus.1
 
-all: MIDITransform.exe
+all: regisztralopult console
 
-OBJECTS = Main.obj MIDI.obj Windowing.obj TransformationLogic.obj
+regisztralopult: $(TARGETDIR)/LED.exe $(TARGETDIR)/drawknob.exe
 
-MIDITransform.exe: $(OBJECTS) MIDITransform.res
-	lib /OUT:"$@" $(OBJECTS) MIDITransform.res
+console: $(TARGETDIR)/console.exe
 
-MIDITransform.res: MIDITransform.rc
-	rc /fo"$@" MIDITransform.rc
+
+
+
+
+# Debug Utilities
+
+debug: $(TARGETDIR)/debug/byte2console.exe $(TARGETDIR)/debug/Debug_console_LED.exe
+# $(TARGETDIR)/debug/Debug_LED.exe $(TARGETDIR)/debug/Debug_LED_2.exe
+
+$(TARGETDIR)/debug/byte2console.exe:
+	$(CC) -o $@ -DREADTIMEOUT=50 byte2console.c serial_io.c CRASH.c
+
+$(TARGETDIR)/debug/Debug_console_LED.exe:
+	$(CC) -o $@ -DREADTIMEOUT=50 -DNO_C2H Debug_console_LED.c serial_io.c CRASH.c console_wire.c
+
+
+# End of Debug Utilities
 
 clean:
-	del *.obj *.res *.exe
+	rm -f *.obj *.res *.exe
 

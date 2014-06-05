@@ -4,6 +4,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "CRASH.h"
 
 void CRASH(const char *msg) {

@@ -5,6 +5,7 @@
 
 #include <windows.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "serial_io.h"
 #include "CRASH.h"
 

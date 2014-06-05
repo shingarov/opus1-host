@@ -8,6 +8,8 @@
 #include "serial_io.h"
 #include "CRASH.h"
 
+int DEBUG=1;
+
 // Global handle is ok, we are not reentrant/concurrent.
 HANDLE h;
 
@@ -30,11 +32,17 @@ static void set_comm_parm(void) {
 }
 
 void open_serial_port(const char *portName) {
+  if (DEBUG)
+    printf("Opening serial port (%s)...\n", portName);
   h = CreateFile(portName,
                   GENERIC_READ | GENERIC_WRITE,
                   0, 0, OPEN_EXISTING, 0, 0);
   if (h == INVALID_HANDLE_VALUE) CRASH("Unable to open LED COM port");
+  if (DEBUG)
+    printf("...port open OK, now setting comm parms...\n");
   set_comm_parm();
+  if (DEBUG)
+    printf("Port setup OK.\n");
 }
 
 void out(unsigned char x) {

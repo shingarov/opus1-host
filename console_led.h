@@ -6,5 +6,6 @@
  *
  */
 
-void setConsoleLed(unsigned led, int status);
+void setConsoleStopLED(unsigned x, unsigned y, unsigned status);
+void set7SegmentLED(unsigned x, unsigned y, unsigned status);
 

@@ -29,3 +29,4 @@ void process_short_message(unsigned channel,
                            unsigned value1,
                            unsigned value2);
 
+void process_sysex(unsigned char *data);

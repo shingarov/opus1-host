@@ -11,36 +11,32 @@
 #include "CRASH.h"
 #include "hauptwerk.h"
 #include "console_led.h"
-#include "console_piston.h"
+#include "console_wire.h"
 
 /*
  * Construct a wire protocol command to turn a LED on/off.
- * This is only called from setConsoleLed().
+ * This is only called from setConsoleStopLED() and from set7SegmentLED().
  */
-static unsigned char ledCommand(unsigned led, int status) {
-  if ((status!=0) && (status!=1)) CRASH("Status mus be 0 or 1");
-  if (led > 10) CRASH("Bad console LED number");
-  return (status << 4) | led;
+static unsigned char ledCommand(unsigned displayNo, unsigned x, unsigned y, unsigned status) {
+  return (status<<7) | (displayNo<<6) | (x<<3) | y;
 }
 
-/*
- * Turn the specified LED ON (status=1) or OFF (status=0).
- * LED numbers:
- *  0    -  M2
- *  1-7  -  1-7
- *  8    -  BASS
- *  9    -  MELODY
- *  10   -  CHIMES
- */
-void setConsoleLed(unsigned led, int status) {
-  out(ledCommand(led, status));
+void setConsoleStopLED(unsigned x, unsigned y, unsigned status) {
+  out(ledCommand(0, x, y, status));
 }
+
+void set7SegmentLED(unsigned x, unsigned y, unsigned status) {
+  out(ledCommand(1, x, y, status));
+}
+
+
+
 
 void process_short_message(unsigned channel,
                            unsigned msgType,
                            unsigned value1,
                            unsigned value2) {
-  if (channel != CONSOLE_CHANNEL) {
+/*  if (channel != CONSOLE_CHANNEL) {
     printf("MIDI message on wrong channel %d: type=%d, value1=%d, value2=%d\n",
          channel, msgType, value1, value2);
     return;
@@ -55,5 +51,93 @@ void process_short_message(unsigned channel,
     return;
   }
   setConsoleLed(value1, msgType==NOTE_ON? 1:0);
+*/
+}
+
+char *hw_sysex_names[] = {
+  "CurrOrganShortName",
+  "CuedFavOrganNum",
+  "CuedFavOrganShortName",
+  "LastOrganShortName",
+  "CurrCombSetShortName",
+  "CuedFavCombSetNum",
+  "CuedFavCombSetShortName",
+  "CurrTemperShortName",
+  "CuedFavTemperNum",
+  "CuedFavTemperShortName",
+  "FloatingDiv1RouteNum",
+  "FloatingDiv1KbdShortNameList",
+  "FloatingDiv2RouteNum",
+  "FloatingDiv2KbdShortNameList",
+  "FloatingDiv3RouteNum",
+  "FloatingDiv3KbdShortNameList",
+  "FloatingDiv4RouteNum",
+  "FloatingDiv4KbdShortNameList",
+  "FloatingDiv5RouteNum",
+  "FloatingDiv5KbdShortNameList",
+  "CurrCombStepperFrameNum",
+  "CuedCombStepperFrameBankNum",
+  "CurrMasterGeneralNum",
+  "LastTriggeredMasterRegObjType",
+  "CurrMasterCrescNum",
+  "CuedMasterCrescStage",
+  "TransposerIncSemitones",
+  "OrganBasePitchHz",
+  "MasterTuningIncCents",
+  "OrganAudioLevelTrimDecibels",
+  "PolyphonyLimitSetting",
+  "SampleRateHz",
+  "LatencyMs",
+  "IsSetterModeOn",
+  "IsScopeModeOn",
+  "IsRecordingAudio",
+  "IsRecordingMIDI",
+  "IsPlayingMIDI",
+  "IsOrganReady",
+  "IsInErrorState",
+  "ProgressIndicatorPct",
+  "MasterOutputLevelCCPct",
+  "FloatingDiv1ExprPedCCPct",
+  "FloatingDiv2ExprPedCCPct",
+  "FloatingDiv3ExprPedCCPct",
+  "FloatingDiv4ExprPedCCPct",
+  "FloatingDiv5ExprPedCCPct",
+  "MasterCrescPedCC",
+  "AudioLevelClipping",
+  "PolyphonyClipping",
+  "CPUClipping",
+  "RAMClipping",
+  "CurrObjShortNameAllTypes",
+  "CuedFavNumAllTypes",
+  "CuedFavShortNameAllTypes",
+  "AllTypesObjType"
+};
+
+void process_7bit_sysex(unsigned char *data) {
+  printf("7bit: %s->%d\n", hw_sysex_names[data[3]], data[4]);
+}
+
+void process_28bit_sysex(unsigned char *data) {
+  unsigned int a,b,c,d, value;
+  a = data[4]; b = data[5]; c = data[6]; d = data[7];
+  value = (a<<21) | (b<<14) | (c<<7) | d;
+  printf("28bit: %s->%d\n", hw_sysex_names[data[3]], value);
+}
+
+void process_16char_sysex(unsigned char *data) {
+  data[20]=0;
+  printf("char: %s->%s\n", hw_sysex_names[data[3]], data+4);
+}
+
+void process_sysex(unsigned char *data) {
+  unsigned char kind = data[2];
+  if (data[0] != 0xF0) return;
+  if (data[1] != 0x7D) return;
+  switch (kind) {
+    case 0x1B: process_7bit_sysex(data); return;
+    case 0x1A: process_28bit_sysex(data); return;
+    case 0x19: process_16char_sysex(data); return;
+    default: return;
+  }
 }
 

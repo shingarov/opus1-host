@@ -31,6 +31,9 @@
 static HMIDIIN  hMidiIn = 0;
 static HMIDIOUT hMidiOut = 0;
 
+static unsigned char sysex_buffer[1024];
+MIDIHDR sysex_header;
+
 /*
  * MIDI input callback function.
  * The driver will call this function every time there is
@@ -53,6 +56,10 @@ static void FAR PASCAL midiInputHandler(HMIDIIN hMidiIn,
       // Call back into our user
       process_short_message(channel, msgType, note, velocity);
       }
+      break;
+    case MIM_LONGDATA:
+      process_sysex(sysex_buffer);
+      midiInAddBuffer(hMidiIn, &sysex_header, sizeof(sysex_header));
       break;
     default:
       break;
@@ -118,8 +125,13 @@ void init_midi_in(const char *in_device_name) {
 	inputDeviceNo = find_input_device(in_device_name);
 	if (inputDeviceNo==-1) return;
 	rc = midiInOpen(&hMidiIn, inputDeviceNo, (DWORD_PTR)midiInputHandler, 0, CALLBACK_FUNCTION);
-	if (rc) return;
-	if (!hMidiIn) return;
+	if (rc) CRASH("midiInOpen()");
+	if (!hMidiIn) CRASH("hMidiIn==NULL");
+        sysex_header.lpData = sysex_buffer;
+        sysex_header.dwBufferLength = 1024;
+        sysex_header.dwFlags = 0;
+        midiInPrepareHeader(hMidiIn, &sysex_header, sizeof(sysex_header));
+        midiInAddBuffer(hMidiIn, &sysex_header, sizeof(sysex_header));
         midiInStart(hMidiIn);
 }
 

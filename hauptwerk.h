@@ -29,6 +29,7 @@
 #define SYSTEM_STATUS_CHANNEL 3
 #define OK_CHANNEL 4
 #define CONSOLE_CHANNEL 5
+#define CONSOLE_DRAWKNOB_CHANNEL 6
 
 // Standard MIDI constants
 #define NOTE_ON  9

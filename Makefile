@@ -27,15 +27,18 @@ all: regisztralopult console
 
 regisztralopult: $(TARGETDIR)/LED.exe $(TARGETDIR)/drawknob.exe
 
-console: $(TARGETDIR)/console.exe
+LED.exe:
+	$(CC) -DREADTIMEOUT=0 LED.c LED_main.c CRASH.c MIDI.c serial_io.c -lwinmm -o LED.exe
 
+console.exe:
+	$(CC) -DREADTIMEOUT=50 console.c serial_io.c console_wire.c console_led.c console_in.c MIDI.c CRASH.c -lwinmm -o console.exe
 
 
 
 
 # Debug Utilities
 
-debug: $(TARGETDIR)/debug/byte2console.exe $(TARGETDIR)/debug/Debug_console_LED.exe
+debug: $(TARGETDIR)/debug/byte2console.exe $(TARGETDIR)/debug/Debug_console_LED.exe $(TARGETDIR)/debug/Debug_console_input.exe
 # $(TARGETDIR)/debug/Debug_LED.exe $(TARGETDIR)/debug/Debug_LED_2.exe
 
 $(TARGETDIR)/debug/byte2console.exe:
@@ -44,9 +47,15 @@ $(TARGETDIR)/debug/byte2console.exe:
 $(TARGETDIR)/debug/Debug_console_LED.exe:
 	$(CC) -o $@ -DREADTIMEOUT=50 -DNO_C2H Debug_console_LED.c serial_io.c CRASH.c console_wire.c
 
+$(TARGETDIR)/debug/Debug_console_input.exe:
+	$(CC) -o $@ -DREADTIMEOUT=50 Debug_console_input.c serial_io.c CRASH.c
 
 # End of Debug Utilities
 
 clean:
 	rm -f *.obj *.res *.exe
+
+shar:
+	$(CC) -o shar1.exe shar1.c
+	$(CC) -o shar2.exe shar2.c
 

@@ -18,7 +18,7 @@ static void set_comm_parm(void) {
   DCB dcb;
   COMMTIMEOUTS ctm;
   char *portParm;
-  portParm = "baud=9600 parity=N data=8 stop=1";
+  portParm = "baud=28800 parity=N data=8 stop=1";
 
   FillMemory(&dcb, sizeof(dcb), 0);
   dcb.DCBlength = sizeof(dcb);

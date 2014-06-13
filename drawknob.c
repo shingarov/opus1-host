@@ -6,7 +6,6 @@
 #include <windows.h>
 #include "CRASH.h"
 #include "MIDI.h"
-#include "hauptwerk.h"
 #include "serial_io.h"
 
 static int DEBUG=0;

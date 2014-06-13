@@ -4,10 +4,10 @@
 */
 
 #include <windows.h>
+#include <stdio.h>
 #include "serial_io.h"
 #include "LED.h"
 #include "MIDI.h"
-#include "hauptwerk.h"
 #include "CRASH.h"
 
 // Possible organ loading states
@@ -16,6 +16,28 @@
 #define ORGAN_LOADED 2
 
 // #define DEBUG 1
+
+
+#define FAV_ORGAN_BUF_SIZE 8
+#define sharedMemName "FavOrganNo"
+static LPCTSTR sharedFavBuf;
+
+static void createFavSharedMem()
+{
+   HANDLE hMapFile;
+   hMapFile = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, FAV_ORGAN_BUF_SIZE, sharedMemName);
+   if (hMapFile == NULL) CRASH("Could not create file mapping object");
+   sharedFavBuf = (LPTSTR) MapViewOfFile(hMapFile,
+                        FILE_MAP_ALL_ACCESS,
+                        0,
+                        0,
+                        FAV_ORGAN_BUF_SIZE);
+   if (sharedFavBuf == NULL) CRASH("Could not map view of file");
+}
+
+static void shareFavoriteOrgan(int f) {
+   *((int*)sharedFavBuf) = f;
+}
 
 static void start_drawknobs() {
   BOOL success;
@@ -93,6 +115,7 @@ static void organ_loading_tick() {
 }
 
 int main() {
+  createFavSharedMem();
   open_serial_port(LED_COM_PORT);
   allLedsOff();
   init_midi_in(MIDI_PORT_LED_HAUPTWERK_TO_OPUS1);
@@ -123,8 +146,8 @@ static void process_organ_selection(unsigned msgType, unsigned value1 ) {
       } else if ((value1>=1) && (value1<=17)) { // Favorite Organ
         if (msgType==NOTE_ON) {
           favorite_organ = (value1>10) ?
-               (value1 - 10) :
-               value1;
+               (value1 - 10) : value1;
+          shareFavoriteOrgan(value1);
         } // NOTE_OFF ignored
       } else if (value1==127) { // AUDIO ACTIVE
         if (msgType==NOTE_ON) {
@@ -234,4 +257,7 @@ void process_short_message(unsigned channel,
   printf("\n");
 #endif
 }
+
+void process_sysex(unsigned char *data) {}
+
 

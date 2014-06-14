@@ -302,31 +302,67 @@ static void event_organIsNotReady() {
 #define TEMPERAMENT_KrzeszowMeantone 30
 
 static int temperament_positions[] = {
-  12,
-  22,
-  14, // kirn-3
-  24, // werck
-  34, // kellner
-  44, // VY
-  26, // 5c
-  36, // 7c
-  54, // Y
-  42, // QCPA
-  52, // mean 5c
-  13, // mean 6c
-  23, // mod mean 6c
-nat
-pyth
-ord
-8c
-10c
+  12, // Zwolle Meantone   [1]
+  22, // Dom Bedos Meantone  [2]
 
+  /* Standard */
+  14, // Kirnberger III
+  24, // Werckmeister III
+  34, // Kellner
+  44, // Vallotti Young
+  26, // 1/5 comma WT
+  36, // 1/7 comma WT
+  54, // Young
+  42, // 1/4 comma Pietro Aaron
+  52, // 1/5 comma MT
+  13, // 1/6 comma MT
+  23, // modified 1/6 comma MT
+  43, // Natural Just
+  53, // Pythagorean Just
+  33, // Ordinaire
+  46, // 1/8 comma
+  56, // 1/10 comma
+  16, // Organ Gabler
+  55, // Organ Silbermann
 
+  /* Additional */
+  11, // Freiberg Dom 1982  [21]
+  21, // Freiberg Dom 1985
+  31, // Freiberg Dom 458Hz
+  41, // Freiberg Petrikirche 458Hz
+  51, // Petrikirche Neihardt II
 
+  15, // Bach-1   [26]
+  25, // Bach-2
+  35, // Bach-3
+  45, // Bach-4
+  32, // Krzeszow MT   [30]
+
+  /* We shouldn't get here */
+  -1,
+  -1
 };
 
+/*
+ * Given the coordinates of the drawknob
+ * pulling a given temperament, return that temperament's
+ * "favorite" number (1-based).
+ * For example, x=1 and y=4 is Kirnberger-III, which is Favorite 3.
+ * Return -1 if nothing corresponds to the given coordinates
+ * (which should never happen).
+ */
 int temperamentXY2N(int x, int y) {
-
+  int i;
+  int xy = 10*x + y;
+printf("temperament: x=%d y=%d\n", x,y);
+  for (i=1; i<=30; i++)
+    if (xy==temperament_positions[i-1]) {
+printf("found favorite %d\n", i);
+      return i;
+    }
+  // unless the caller is passing bogus arguments,
+  // control should never reach here
+  return -1;
 }
 
 static char *temperament_shortnames[] = {
@@ -378,7 +414,7 @@ void printCurrentTemperament() {
   if (temp==TEMPERAMENT_EQUAL) { print7segment("E ", 3); return; }
   if (temp==TEMPERAMENT_ORIGINAL) { print7segment("0g", 3); return; }
   if (temp==TEMPERAMENT_UNKNOWN) { print7segment("--", 3); return; }
-  sprintf(buf, "%d ", temp+1); // TODO print positions
+  sprintf(buf, "%d ", temperament_positions[temp]);
   print7segment(buf, 3);
 }
 

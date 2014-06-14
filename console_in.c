@@ -16,11 +16,16 @@
  * There are three kinds of controls the organist can push on the console.
  * 1) Stop Drawknobs. We transmit NOTE_ON/OFF on CONSOLE_DRAWKNOB_CHANNEL (6)
  *    note number 0xXY, X=1..5, Y=1..6.
+ *    However, if the R modifier is pressed, we transmit a NOTE_ON/OFF on the
+ *    TEMPERAMENT_CHANNEL (7) instead; the note number is the temperament number
+ *    as defined by the extern function temperamentXY2N().
  * 2) Pistons.   We transmit NOTE_ON/OFF on CONSOLE_CHANNEL (5)
  *    note numbers N=0..12, or N+16 if the R modifier is pressed.
  *    N: 0=M2, 
  * 3) Studs.  We transmit NOTE_ON/OFF on CONSOLE_CHANNEL (5)
  *    note numbers 64+S, S=0..3, or 64+4+S if the R modifier is pressed.
+ *
+ * NB: The reference to channel numbers above is 0-based.
  */
 
 
@@ -48,7 +53,9 @@ void process_piston(int p, int on) {
       R = on? PRESSED : NOT_PRESSED;
       return;
     }
+printf("process_piston: p=%d\n", p);
     note_number = PISTONS[p];
+printf("note_number=%d\n", note_number);
     if (note_number == UNDEFINED) {
       // oh...
       return;
@@ -72,6 +79,7 @@ extern int temperamentXY2N(int x, int y);
 
 void process_drawknob(int x, int y, int on) {
     unsigned int note;
+printf("PROCESS DRAWKNOB x=%d y=%d on=%d\n", x,y, on);
     note = ((x+1)<<4)|(y+1);
     if (R==NOT_PRESSED) {
       send_short_message(CONSOLE_DRAWKNOB_CHANNEL,
@@ -80,8 +88,9 @@ void process_drawknob(int x, int y, int on) {
                        127);
     } else {
       // R+Drawknob = load temperament
-      if (on!=NOTE_ON) return;
-      note = temperamentXY2N(x,y);
+      if (!on) return;
+      note = temperamentXY2N(x+1, y+1);
+      if (note==-1) return; // should not happen
       send_short_message(TEMPERAMENT_CHANNEL,
                        NOTE_ON,
                        note,

@@ -53,9 +53,7 @@ void process_piston(int p, int on) {
       R = on? PRESSED : NOT_PRESSED;
       return;
     }
-printf("process_piston: p=%d\n", p);
     note_number = PISTONS[p];
-printf("note_number=%d\n", note_number);
     if (note_number == UNDEFINED) {
       // oh...
       return;
@@ -79,7 +77,6 @@ extern int temperamentXY2N(int x, int y);
 
 void process_drawknob(int x, int y, int on) {
     unsigned int note;
-printf("PROCESS DRAWKNOB x=%d y=%d on=%d\n", x,y, on);
     note = ((x+1)<<4)|(y+1);
     if (R==NOT_PRESSED) {
       send_short_message(CONSOLE_DRAWKNOB_CHANNEL,

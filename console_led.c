@@ -124,8 +124,9 @@ void process_short_message(unsigned channel,
   unsigned x, y;
   switch (channel) {
     case CONSOLE_DRAWKNOB_CHANNEL:
-      if (msgType != NOTE_OFF) {
-        printf("Unknown message type %d (value1=%d, value2=%d)\n", msgType, value1, value2);
+      if ((msgType!=NOTE_OFF) && (msgType!=NOTE_ON)) {
+        printf("Unknown message type %d (value1=%d, value2=%d) on CONSOLE_DRAWKNOB_CHANNEL\n",
+                msgType, value1, value2);
         return;
       }
       x = (value1&0xF0)>>4;

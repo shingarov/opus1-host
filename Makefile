@@ -25,10 +25,13 @@ TARGETDIR=/home/boris/lamya/opus.1
 
 all: regisztralopult console
 
-regisztralopult: $(TARGETDIR)/LED.exe $(TARGETDIR)/drawknob.exe
+regisztralopult: LED.exe drawknob.exe
 
 LED.exe:
-	$(CC) -DREADTIMEOUT=0 LED.c LED_main.c CRASH.c MIDI.c serial_io.c -lwinmm -o LED.exe
+	$(CC) -DREADTIMEOUT=0 -DNO_C2H LED.c LED_main.c CRASH.c MIDI.c serial_io.c -lwinmm -o LED.exe
+
+drawknob.exe:
+	$(CC) -DREADTIMEOUT=0 -DNO_H2C drawknob.c CRASH.c MIDI.c serial_io.c -lwinmm -o $@
 
 console.exe:
 	$(CC) -DREADTIMEOUT=50 console.c serial_io.c console_wire.c console_led.c console_in.c MIDI.c CRASH.c -lwinmm -o console.exe
@@ -54,8 +57,4 @@ $(TARGETDIR)/debug/Debug_console_input.exe:
 
 clean:
 	rm -f *.obj *.res *.exe
-
-shar:
-	$(CC) -o shar1.exe shar1.c
-	$(CC) -o shar2.exe shar2.c
 

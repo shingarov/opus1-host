@@ -198,16 +198,16 @@ static void process_ok(unsigned msgType, unsigned note ) {
   if (msgType==NOTE_ON) {
     setOK(ON);
 #ifdef DEBUG
-    printf(" OK ON ");
+    printf("OK ON\n");
 #endif
   } else if (msgType==NOTE_OFF) {
     setOK(OFF);
 #ifdef DEBUG
-    printf(" OK OFF ");
+    printf("OK OFF\n");
 #endif
   } else {
     // ignore unknown message types
-    printf(" UNKNOWN TYPE ");
+    printf("UNKNOWN MSG TYPE\n", msgType);
   }
 }
 
@@ -250,7 +250,8 @@ void process_short_message(unsigned channel,
       process_ok(msgType, value1);
       break;
     default:
-      printf(" UNKNOWN CHANNEL ");
+      printf("UNKNOWN CHANNEL %d, MSGTYPE %d, NOTE %d\n",
+                   channel, msgType, value1);
       break;
   }
 #ifdef DEBUG

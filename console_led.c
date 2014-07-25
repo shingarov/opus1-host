@@ -142,7 +142,7 @@ void process_short_message(unsigned channel,
       setConsoleStopLED(x-1, y-1, msgType==NOTE_ON? 1:0);
       return;
     default:
-      printf("Unknown channel %d (value1=%d, value2=%d)\n", channel, value1, value2);
+      printf("Unknown channel %d msgType=%d value=%d/%d\n", channel, msgType, value1, value2);
       return;
   }
 }
@@ -403,18 +403,25 @@ static char *temperament_shortnames[] = {
 };
 
 #define TEMPERAMENT_ORIGINAL -1
-#define TEMPERAMENT_EQUAL -2
-#define TEMPERAMENT_UNKNOWN -3
-static int temp_no = 0;
+#define TEMPERAMENT_EQUAL    -2
+#define TEMPERAMENT_UNKNOWN  -3
+#define TEMPERAMENT_NONE     -4
+static int temp_no = TEMPERAMENT_NONE;
 static int currentTemperamentNo() {
   return temp_no;
 }
 void printCurrentTemperament() {
   char buf[32];
   int temp = currentTemperamentNo();
-  if (temp==TEMPERAMENT_EQUAL) { print7segment("E ", 3); return; }
-  if (temp==TEMPERAMENT_ORIGINAL) { print7segment("0g", 3); return; }
-  if (temp==TEMPERAMENT_UNKNOWN) { print7segment("--", 3); return; }
+  if (temp==TEMPERAMENT_EQUAL) {
+    print7segment("E ", 3); return;
+  } else if (temp==TEMPERAMENT_ORIGINAL) {
+    print7segment("0g", 3); return;
+  } else if (temp==TEMPERAMENT_UNKNOWN) {
+    print7segment("--", 3); return;
+  } else if (temp==TEMPERAMENT_NONE) {
+    print7segment("  ", 3); return;
+  }
   sprintf(buf, "%d ", temperament_positions[temp]);
   print7segment(buf, 3);
 }
@@ -427,7 +434,9 @@ void printCurrentCombination() {
 }
 
 static void temperamentIs(unsigned char *name) {
-  if      (!strcmp(name, "Equal           ")) temp_no = TEMPERAMENT_EQUAL;
+  if      (!strlen(name)) temp_no = TEMPERAMENT_NONE;
+  else if (!strcmp(name, "                ")) temp_no = TEMPERAMENT_NONE;
+  else if (!strcmp(name, "Equal           ")) temp_no = TEMPERAMENT_EQUAL;
   else if (!strcmp(name, "OrigOrgTemp     ")) temp_no = TEMPERAMENT_ORIGINAL;
   else {
     int i;
@@ -437,6 +446,7 @@ static void temperamentIs(unsigned char *name) {
         return;
       }
     }
+    printf("Unknown temperament <%s>\n", name);
     temp_no=TEMPERAMENT_UNKNOWN;
   }
 }
@@ -486,7 +496,8 @@ void process_28bit_sysex(unsigned char *data) {
       if (isOrganReady) printCurrentCombination();
       return;
     default:
-      printf("28bit: %s->%d\n", hw_sysex_names[data[3]], value);
+      //printf("28bit: %s->%d\n", hw_sysex_names[data[3]], value);
+      return;
   }
 }
 

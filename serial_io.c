@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 LADAREVO SOFTWARE INC.
+ * Copyright (c) 2009-2014 LADAREVO SOFTWARE INC.
  * LADAREVO ORGELBAU LAB
  */
 
@@ -8,6 +8,9 @@
 #include <stdio.h>
 #include "serial_io.h"
 #include "CRASH.h"
+
+//#define SERIALPARM "baud=9600 parity=N data=8 stop=1"
+#define SERIALPARM "baud=28800 parity=N data=8 stop=1"
 
 int DEBUG=1;
 
@@ -18,7 +21,7 @@ static void set_comm_parm(void) {
   DCB dcb;
   COMMTIMEOUTS ctm;
   char *portParm;
-  portParm = "baud=28800 parity=N data=8 stop=1";
+  portParm = SERIALPARM;
 
   FillMemory(&dcb, sizeof(dcb), 0);
   dcb.DCBlength = sizeof(dcb);

@@ -13,15 +13,15 @@
 // The Drawknobs port is uni-directional from the control surface
 // to Hauptwerk; it is related to the  physical Duemilanove which
 // only transmits data to the host.
-#define MIDI_PORT_DRAWKNOBS_OPUS1_TO_HAUPTWERK "1. Internal MIDI"
+#define MIDI_PORT_DRAWKNOBS_OPUS1_TO_HAUPTWERK "Regisztralopult IN"
 
 // The LED port is unidirectional: the Uno to which the LEDs are
 // connected, only receives data from the host.
-#define MIDI_PORT_LED_HAUPTWERK_TO_OPUS1       "2. Internal MIDI"
+#define MIDI_PORT_LED_HAUPTWERK_TO_OPUS1       "Regisztralopult OUT"
 
 // There are two unidirectional Rodgers Console ports.
-#define MIDI_PORT_CONSOLE_PISTONS              "3. Internal MIDI"
-#define MIDI_PORT_CONSOLE_LED                  "4. Internal MIDI"
+#define MIDI_PORT_CONSOLE_PISTONS              "Console IN"
+#define MIDI_PORT_CONSOLE_LED                  "Console OUT"
 
 
 // MIDI channels (0-based).

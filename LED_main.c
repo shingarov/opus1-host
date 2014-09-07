@@ -143,7 +143,7 @@ static void process_organ_selection(unsigned msgType, unsigned value1 ) {
           allOrganLoadingLedsOff();
           organ_status = ORGAN_LOADING;
         } // NOTE_OFF ignored
-      } else if ((value1>=1) && (value1<=17)) { // Favorite Organ
+      } else if ((value1>=1) && (value1<=19)) { // Favorite Organ
         if (msgType==NOTE_ON) {
           favorite_organ = (value1>10) ?
                (value1 - 10) : value1;

@@ -28,8 +28,10 @@
  * Global variables are fine here, as this code is not supposed
  * to be reentrant.
  */
-static HMIDIIN  hMidiIn = 0;
-static HMIDIOUT hMidiOut = 0;
+#define MIDI_PORT_IN  HMIDIIN
+#define MIDI_PORT_OUT HMIDIOUT
+static MIDI_PORT_IN  hMidiIn  = (MIDI_PORT_IN)0;
+static MIDI_PORT_OUT hMidiOut = (MIDI_PORT_OUT)0;
 
 static unsigned char sysex_buffer[1024];
 MIDIHDR sysex_header;

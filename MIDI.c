@@ -19,22 +19,35 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
-#include <windows.h>
-#include <mmsystem.h>
+#include "teVirtualMIDI/teVirtualMIDI.h"
 #include "MIDI.h"
 
 /*
  * Global variables are fine here, as this code is not supposed
  * to be reentrant.
  */
-#define MIDI_PORT_IN  HMIDIIN
-#define MIDI_PORT_OUT HMIDIOUT
+#define MIDI_PORT_IN  LPVM_MIDI_PORT
+#define MIDI_PORT_OUT LPVM_MIDI_PORT
 static MIDI_PORT_IN  hMidiIn  = (MIDI_PORT_IN)0;
 static MIDI_PORT_OUT hMidiOut = (MIDI_PORT_OUT)0;
 
-static unsigned char sysex_buffer[1024];
-MIDIHDR sysex_header;
+#define MAX_SYSEX_BUFFER 65535
+
+char *binToStr( const unsigned char *data, DWORD length ) {
+        static char dumpBuffer[ MAX_SYSEX_BUFFER * 3 ];
+        DWORD index = 0;
+
+        while ( length-- ) {
+                sprintf( dumpBuffer+index, "%02x", *data );
+                if ( length ) {
+                        strcat( dumpBuffer, ":" );
+                }
+                index+=3;
+                data++;
+        }
+        return dumpBuffer;
+}
+
 
 #ifndef NO_H2C
 /*
@@ -42,32 +55,25 @@ MIDIHDR sysex_header;
  * The driver will call this function every time there is
  * a MIDI message on the input port.
  */
-static void FAR PASCAL midiInputHandler(HMIDIIN hMidiIn,
-                                        WORD wMsg,
-                                        DWORD dwInstance,
-                                        DWORD dwParam1,
-                                        DWORD dwParam2) {
-  switch(wMsg) {
-    case MIM_DATA:
-      {
-      unsigned channel, msgType, note, velocity;
-      channel  = (dwParam1 & 0x0000000F);
-      msgType  = (dwParam1 & 0x000000F0) >> 4;
-      note     = (dwParam1 & 0x0000FF00) >> 8;
-      velocity = (dwParam1 & 0x00FF0000) >> 16;
-
-      // Call back into our user
-      process_short_message(channel, msgType, note, velocity);
-      }
-      break;
-    case MIM_LONGDATA:
-      process_sysex(sysex_buffer);
-      midiInAddBuffer(hMidiIn, &sysex_header, sizeof(sysex_header));
-      break;
-    default:
-      break;
+static void CALLBACK teVMCallback( LPVM_MIDI_PORT midiPort, LPBYTE midiDataBytes, DWORD length, DWORD_PTR dwCallbackInstance ) {
+        if ( ( NULL == midiDataBytes ) || ( 0 == length ) ) {
+                printf( "empty command - driver was probably shut down!\n" );
+                return;
+        }
+  if (*midiDataBytes == 0xF0) {
+    process_sysex((unsigned char*)midiDataBytes);
+  } else {
+    unsigned char *x;
+    unsigned channel, msgType, value1, value2;
+    x = (unsigned char*)midiDataBytes;
+    msgType = (0xF0 & x[0]) >> 4;
+    channel = 0x0F & x[0];
+    value1 = x[1];
+    value2 = x[2];
+    process_short_message(channel, msgType, value1, value2);
   }
 }
+
 #endif // NO_H2C
 
 
@@ -79,98 +85,34 @@ void send_short_message(unsigned channel,
                         unsigned msgType,
                         unsigned byte1,
                         unsigned byte2) {
-  unsigned param1;
-  if (!hMidiOut) return;
-  param1 =
-    channel |
-    (msgType << 4) |
-    (byte1 << 8) |
-    (byte2 << 16);
-  midiOutShortMsg(hMidiOut, param1);
-}
-
-/*
- * Return the number (index) of the physical input device
- * named @name, or -1 if not found.
- */
-static int find_input_device(const char *name) {
-  int numDevices;
-  int i;
-
-  numDevices = midiInGetNumDevs();
-  for (i=0; i<numDevices; i++) {
-    MIDIINCAPS midiInCaps;
-    UINT rc = midiInGetDevCaps(i, (LPMIDIINCAPS)&midiInCaps, sizeof(MIDIINCAPS));
-    if (rc) return -1;
-    if (!lstrcmp(midiInCaps.szPname, name)) return i;
+  unsigned char x[3];
+  x[0] = channel | (msgType << 4);
+  x[1] = byte1;
+  x[2] = byte2;
+  if (!virtualMIDISendData(hMidiOut, x, 3)) {
+    CRASH("Error sending short MIDI message");
   }
-  return -1;
-}
-
-/*
- * Return the number (index) of the physical output device named @name, or -1 if not found.
- */
-static int find_output_device(const char *name) {
-  int numDevices;
-  int i;
-
-  numDevices = midiOutGetNumDevs();
-  for (i=0; i<numDevices; i++) {
-    MIDIOUTCAPS midiOutCaps;
-    UINT rc = midiOutGetDevCaps(i, (LPMIDIOUTCAPS)&midiOutCaps, sizeof(MIDIOUTCAPS));
-    if (rc) return -1;
-    if (!lstrcmp(midiOutCaps.szPname, name)) return i;
-  }
-  return -1;
 }
 
 #ifndef NO_H2C
-void init_midi_in(const char *in_device_name) {
-	int inputDeviceNo, rc;
-
-	inputDeviceNo = -1;
-        while (inputDeviceNo == -1) {
-          inputDeviceNo = find_input_device(in_device_name);
-          sleep(1);
+void init_midi_in(LPCWSTR in_device_name) {
+        hMidiIn = virtualMIDICreatePortEx2(in_device_name, teVMCallback, 0, MAX_SYSEX_BUFFER, TE_VM_FLAGS_PARSE_RX );
+        if (!hMidiIn) {
+                CRASH("could not create input port");
+                return;
         }
-	rc = midiInOpen(&hMidiIn,
-                        inputDeviceNo,
-                        (DWORD_PTR)midiInputHandler,
-                        0,
-                        CALLBACK_FUNCTION);
-	if (rc) CRASH("midiInOpen()");
-	if (!hMidiIn) CRASH("hMidiIn==NULL");
-        sysex_header.lpData = sysex_buffer;
-        sysex_header.dwBufferLength = 1024;
-        sysex_header.dwFlags = 0;
-        midiInPrepareHeader(hMidiIn, &sysex_header, sizeof(sysex_header));
-        midiInAddBuffer(hMidiIn, &sysex_header, sizeof(sysex_header));
-        midiInStart(hMidiIn);
 }
 #endif  // NO_H2C
 
-void init_midi_out(const char *out_device_name) {
-  int outputDeviceNo, rc;
-
-  outputDeviceNo = -1;
-  while (outputDeviceNo==-1) {
-    outputDeviceNo = find_output_device(out_device_name);
-    sleep(1);
-  }
-  rc = midiOutOpen(&hMidiOut, outputDeviceNo, (DWORD_PTR)NULL, (DWORD_PTR)NULL, 0);
-  if (rc) return; 
-  if (!hMidiOut) return;
+void init_midi_out(LPCWSTR out_device_name) {
+        hMidiOut = virtualMIDICreatePortEx2(out_device_name, NULL, 0, MAX_SYSEX_BUFFER, TE_VM_FLAGS_PARSE_RX );
+        if (!hMidiOut) {
+                CRASH("could not create output port");
+                return;
+        }
 }
 
-void reset_midi() {
-  if (hMidiIn) {
-    midiInStop (hMidiIn);
-    midiInReset(hMidiIn);
-    midiInClose(hMidiIn);
-  }
-  if (hMidiOut) {
-    midiOutReset(hMidiOut);
-    midiOutClose(hMidiOut);
-  }
+void reset_midi(void) {
+//TODO
 }
 

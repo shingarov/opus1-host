@@ -9,8 +9,9 @@
 #include "serial_io.h"
 #include "CRASH.h"
 
-//#define SERIALPARM "baud=9600 parity=N data=8 stop=1"
-#define SERIALPARM "baud=28800 parity=N data=8 stop=1"
+#ifndef SERIALBAUD
+#error SERIALBAUD must be defined
+#endif
 
 int DEBUG=1;
 
@@ -21,7 +22,7 @@ static void set_comm_parm(void) {
   DCB dcb;
   COMMTIMEOUTS ctm;
   char *portParm;
-  portParm = SERIALPARM;
+  portParm = "baud=" SERIALBAUD " parity=N data=8 stop=1";
 
   FillMemory(&dcb, sizeof(dcb), 0);
   dcb.DCBlength = sizeof(dcb);

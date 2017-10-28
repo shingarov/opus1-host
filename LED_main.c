@@ -138,11 +138,20 @@ static void process_speaking_stop(unsigned msgType, unsigned stop) {
 }
 
 static void process_organ_selection(unsigned msgType, unsigned value1 ) {
+if (msgType==NOTE_ON) printf("Organ Loading ON!\n");
+if (msgType==NOTE_OFF) printf("Organ Loading OFF!\n");
       if (value1==0) { // ORGAN LOADING ON/OFF
         if (msgType==NOTE_ON) {
           allOrganLoadingLedsOff();
           organ_status = ORGAN_LOADING;
-        } // NOTE_OFF ignored
+        } else if (msgType==NOTE_OFF) {
+          // Workaround with "Audio Active" no longer needed
+          if (organ_status==ORGAN_LOADING) {
+            organ_status = ORGAN_LOADED;
+            allOrganLoadingLedsOff();
+            setOrganLed(favorite_organ, ON);
+          }
+        }
       } else if ((value1>=1) && (value1<=19)) { // Favorite Organ
         if (msgType==NOTE_ON) {
           favorite_organ = (value1>10) ?

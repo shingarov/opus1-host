@@ -5,6 +5,8 @@
  *
  */
 
+#include <windows.h>
+
 /*
  * Hauptwerk MIDI settings.
  */
@@ -13,15 +15,15 @@
 // The Drawknobs port is uni-directional from the control surface
 // to Hauptwerk; it is related to the  physical Duemilanove which
 // only transmits data to the host.
-#define MIDI_PORT_DRAWKNOBS_OPUS1_TO_HAUPTWERK "Regisztralopult IN"
+#define MIDI_PORT_DRAWKNOBS_OPUS1_TO_HAUPTWERK L"Regisztralopult IN"
 
 // The LED port is unidirectional: the Uno to which the LEDs are
 // connected, only receives data from the host.
-#define MIDI_PORT_LED_HAUPTWERK_TO_OPUS1       "Regisztralopult OUT"
+#define MIDI_PORT_LED_HAUPTWERK_TO_OPUS1       L"Regisztralopult OUT"
 
 // There are two unidirectional Rodgers Console ports.
-#define MIDI_PORT_CONSOLE_PISTONS              "Console IN"
-#define MIDI_PORT_CONSOLE_LED                  "Console OUT"
+#define MIDI_PORT_CONSOLE_PISTONS              L"Console IN"
+#define MIDI_PORT_CONSOLE_LED                  L"Console OUT"
 
 
 // MIDI channels (0-based).
@@ -49,8 +51,8 @@
  *       Exported functions       *
  **********************************/
 
-void init_midi_in(const char *in_device_name);
-void init_midi_out(const char *out_device_name);
+void init_midi_in (LPCWSTR in_device_name);
+void init_midi_out(LPCWSTR out_device_name);
 
 void reset_midi(void);
 

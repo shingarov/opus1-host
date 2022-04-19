@@ -3,7 +3,7 @@
  * embedded in the Rodgers console; take the reports from the
  * console (as parsed by console_wire) and transform them to MIDI.
  *
- * Copyright (c) 2009-2014 LADAREVO SOFTWARE INC.
+ * Copyright (c) 2009-2022 LADAREVO SOFTWARE INC.
  * LADAREVO ORGELBAU LAB
  *
  */
@@ -20,8 +20,8 @@
  *    TEMPERAMENT_CHANNEL (7) instead; the note number is the temperament number
  *    as defined by the extern function temperamentXY2N().
  * 2) Pistons.   We transmit NOTE_ON/OFF on CONSOLE_CHANNEL (5)
- *    note numbers N=0..12, or N+16 if the R modifier is pressed.
- *    N: 0=M2, 
+ *    note numbers N=1..12, or N+16 if the R modifier is pressed,
+ *    or N+32 if the M2 modifier is pressed.
  * 3) Studs.  We transmit NOTE_ON/OFF on CONSOLE_CHANNEL (5)
  *    note numbers 64+S, S=0..3, or 64+4+S if the R modifier is pressed.
  *
@@ -29,36 +29,50 @@
  */
 
 
-
+// MIDI notes for pistons
 #define UNDEFINED -1
-#define M2 0
 #define BASS 8
 #define MELODY 9
 #define CHIMES 10
 #define RG 11
 #define SET 12
+
 #define PRESSED 1
 #define NOT_PRESSED 0
-static int R = NOT_PRESSED;
+static int R  = NOT_PRESSED;
+static int M2 = NOT_PRESSED;
 
 void process_piston(int p, int on) {
     int note_number;
     static int PISTONS[16] =
-      { UNDEFINED, // special -- R is mapped
+      { UNDEFINED /* R */, // we don't send MIDI when modifier is toggled
         1,4,2,5,3,6,7,
-        M2,RG,UNDEFINED,SET,BASS,CHIMES,MELODY,UNDEFINED };
+        UNDEFINED /* M2 */,
+        RG,
+        UNDEFINED, // no piston has scan code 0x*A
+        SET,
+        BASS,
+        CHIMES,
+        MELODY,
+        UNDEFINED // no piston has scan code 0x*F
+      };
     if (p==0) {
-      // R is pressed.
-      // R is special, sort of "SHIFT" which adds 16 to the MIDI note number.
+      // R changed state
       R = on? PRESSED : NOT_PRESSED;
+      return;
+    }
+    if (p==8) {
+      // M2 changed state
+      M2 = on? PRESSED : NOT_PRESSED;
       return;
     }
     note_number = PISTONS[p];
     if (note_number == UNDEFINED) {
-      // oh...
+      // this can never happen.  (should we CRASH() instead?)
       return;
     }
     if (R==PRESSED) note_number += 16;
+    if (M2==PRESSED) note_number += 32;
     send_short_message(CONSOLE_CHANNEL,
                        on? NOTE_ON:NOTE_OFF,
                        note_number,
